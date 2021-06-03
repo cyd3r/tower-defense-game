@@ -1,0 +1,65 @@
+.ingame .hints-container {
+    /* show the handle of the hints */
+    left: -260px;
+}
+
+.hints-container {
+    position: absolute;
+    top: 100px;
+    /* in the menu, the hints are not visible */
+    left: -500px;
+    width: 300px;
+    height: 50vh;
+
+    transition-duration: 0.5s;
+}
+.hints {
+    height: 100%;
+}
+.hints-container:hover {
+    left: 0px;
+}
+.hints {
+    display: flex;
+    margin-left: 2vh;
+}
+.hints .handle {
+    display: flex;
+    width: 20px;
+    margin-left: 20px;
+}
+.hints .handle h2 {
+    margin: 0;
+    /* margin: 10px; */
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+}
+
+.hints .content {
+    overflow: auto;
+    /* taken from https://webapplecture.github.io/ ;) */
+    scrollbar-width: thin;
+}
+.hints .content::-webkit-scrollbar {
+    width: 11px;
+}
+.hints .content::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, .2);
+}
+.hints .content::-webkit-scrollbar-thumb {
+    background-color: var(--background-color);
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+}
+
+.hints .content img {
+    max-width: 100%;
+    margin: 0 auto;
+    display: block;
+}
+
+.hints .content em {
+    color: orange;
+    font-style: normal;
+}

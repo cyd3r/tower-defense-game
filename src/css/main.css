@@ -1,0 +1,102 @@
+@import url("./hints.css");
+@import url("./toolbar.css");
+
+:root {
+    --background-color: #8C8273;
+    /* --background-color: #65aaae; */
+    --button-color: #c1c7c798;
+    --select-color: #0f4e5f;
+}
+
+@font-face {
+    font-family: "Komika";
+    src: url("./KOMIKAX_.woff") format("woff"),
+         url("./KOMIKAX_.ttf") format("truetype");
+}
+
+body {
+    margin: 0;
+
+    height: 100%;
+    background: linear-gradient(#333434, darkslategray);
+
+    font-family: "Komika";
+    font-size: 0.75em;
+}
+button {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.logo {
+    font-size: 5vh;
+    margin: 0;
+    text-align: center;
+}
+
+.white-shadow {
+    color: white;
+    text-shadow: 0.15em 0.15em black;
+}
+
+.graybox {
+    /* border */
+    border: 2vh solid  var(--background-color);
+    border-radius: 2vh;
+    /* canvas size */
+    background-color: var(--background-color);
+}
+
+.canvas-container{
+    margin: auto;
+    width: max-content;
+    display: flex;
+}
+
+.wave-progress {
+    height: 5px;
+}
+.overlay-container {
+    position: relative;
+}
+.overlay {
+    display: flex;
+    position: absolute;
+    background-color: #0000002e;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+kbd {
+    /* https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd */
+    background-color: #eee;
+    border-radius: 3px;
+    border: 1px solid #b4b4b4;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+    color: #333;
+    vertical-align: middle;
+    font-size: 1.3em;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 4px;
+    white-space: nowrap;
+}
+
+.credits {
+    position: fixed;
+    left: 10px;
+    bottom: 10px;
+    color: white;
+}
+.credits a {
+    color: white;
+}

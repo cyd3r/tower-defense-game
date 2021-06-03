@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" href="src/css/main.css">
+        <title>Tower Defense</title>
+    </head>
+    <body>
+        <div class="box">
+            <h1 class="logo white-shadow">&nbsp;</h1>
+            <div class="canvas-container graybox">
+                <div class="overlay-container">
+                    <div class="wave-progress"></div>
+                    <canvas id="screen" width="832" height="640"></canvas>
+                    <div class="overlay hidden">
+                        <h1 class="gameover-text white-shadow">Game Over</h1>
+                        <div class="gameover-controls">
+                            <button class="play-again">Play again</button>
+                            <button class="back-to-map">Back to the map</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="towers hidden">
+                    <button class="open-map">Map</button>
+                    <div class="lives">
+                        <img src="./src/images/platformer-pack-redux/hudHeart_full.png">
+                        <img src="./src/images/platformer-pack-redux/hudHeart_full.png">
+                        <img src="./src/images/platformer-pack-redux/hudHeart_full.png">
+                    </div>
+
+                    <div class="coins">
+                        <img src="./src/images/platformer-pack-redux/hudCoin.png">
+                        <span class="my-coins"></span>
+                    </div>
+
+                    <div class="tower-entry">
+                        <button class="tower-button demolish">
+                            <img src="./src/images/tower-defense-top-down/towerDefense_tile287.png" width="50">
+                        </button>
+                        <div class="tower-details">
+                            <h2 class="white-shadow">Sell</h2>
+                            <p>Hotkey: <kbd>S</kbd></p>
+                            <p>Removes the selected tower and refunds you with half of the buy price.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hints-container">
+            <div class="hints graybox">
+                <div class="content"></div>
+                <div class="handle">
+                    <h2 class="white-shadow">Hints</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="credits">
+            <p><a href="/credits.html">Credits</a></p>
+        </div>
+
+        <audio class="atmo" loop src="src/audio/zapsplat/smartsound_ATMO_NATURE_Country_Birds_Call_01.mp3"></audio>
+        <!-- atmo is just there to fill the void, no high volume required -->
+        <script>document.querySelector('.atmo').volume = 0.1;</script>
+        <!-- required to load tilesheet inside the canvas -->
+        <img style="display: none" id="tilesheet" src="src/images/tilesheet.png">
+    </body>
+    <script type="module" src="src/js/index.js"></script>
+</html>

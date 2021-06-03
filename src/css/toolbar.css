@@ -1,0 +1,70 @@
+.towers{
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 0 1vw;
+}
+.coins {
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+.coins img {
+    height: 1.5em;
+}
+.lives {
+    display: flex;
+    width: 68px;
+    justify-content: space-between;
+}
+.lives img {
+    width: 30%;
+}
+.tower-entry {
+    position: relative;
+}
+.tower-details {
+    position: absolute;
+    right: 68px;
+    top: 0px;
+    display: none;
+    width: 200px;
+    text-align: left;
+    background-color: var(--background-color);
+    padding: .5em;
+
+    border: 2px solid black;
+    border-radius: 4px;
+}
+.tower-details h2, .tower-details p {
+    margin: 0;
+}
+.tower-button {
+    width: 58px;
+    height: 58px;
+    border: 2px solid var(--select-color);
+    border-radius: 8px;
+    padding: 2px;
+    background-color: var(--button-color);
+    margin-top: 2px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+.tower-button:hover ~ .tower-details {
+    display: block;
+}
+
+.btnClicked {
+    background-color: var(--select-color);
+}
+
+.not-affordable img {
+    filter: grayscale(80%);
+}
+.not-affordable.tower-button {
+    border: 2px solid var(--button-color);
+}
+
+.open-map {
+    width: 100%;
+}
