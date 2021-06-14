@@ -2,9 +2,14 @@
  * https://artandlogic.com/2019/07/unlocking-the-web-audio-api/
  */
 export class BufferLoader {
+    private _af_buffers: Map<string, AudioBuffer>;
+    private _audioCtx: AudioContext;
+    private _isUnlocked: boolean;
+    static singleton: BufferLoader;
+
     constructor() {
         this._af_buffers = new Map();
-        this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this._audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         this._isUnlocked = false;
         this._unlockAudio();
         BufferLoader.singleton = this;
@@ -17,8 +22,8 @@ export class BufferLoader {
      * @returns {Promise<any>}
      * @private
      */
-    _decodeShim(arraybuffer) {
-        return new Promise((resolve, reject) => {
+    _decodeShim(arraybuffer: ArrayBuffer) {
+        return new Promise<AudioBuffer>((resolve, reject) => {
             this._audioCtx.decodeAudioData(arraybuffer, (buffer) => {
                 return resolve(buffer);
             }, (err) => {
@@ -58,7 +63,7 @@ export class BufferLoader {
 
             // Once the source has fired the onended event, indicating it did indeed play,
             // we can know that the audio API is now unlocked.
-            source.onended = function () {
+            source.onended = () => {
                 source.disconnect(0);
 
                 // Don't bother trying to unlock the API more than once!
@@ -82,10 +87,8 @@ export class BufferLoader {
     /**
      * Allow the requester to load a new sfx, specifying a file to load.
      * We store the decoded audio data for future (re-)use.
-     * @param {string} sfxFile
-     * @returns {Promise<AudioBuffer>}
      */
-    async load (sfxFile) {
+    async load(sfxFile: string) {
         if (this._af_buffers.has(sfxFile)) {
             return this._af_buffers.get(sfxFile);
         }
@@ -108,14 +111,13 @@ export class BufferLoader {
     /**
      * Play the specified file, loading it first - either retrieving it from the saved buffers, or fetching
      * it from the network.
-     * @param sfxFile
      * @returns {Promise<AudioBufferSourceNode>}
      */
-    playFile(sfxFile, volume) {
+    playFile(sfxFile: string, volume: number) {
         return this.load(sfxFile).then((audioBuffer) => {
             const sourceNode = this._audioCtx.createBufferSource(),
                 gainNode = this._audioCtx.createGain();
-            sourceNode.buffer = audioBuffer;
+            sourceNode.buffer = audioBuffer ?? null;
             sourceNode.connect(gainNode);
             gainNode.connect(this._audioCtx.destination);
             gainNode.gain.value = volume || 1;
@@ -126,10 +128,10 @@ export class BufferLoader {
     };
 
     async loadAll() {
-        const promises = Object.keys(SOUNDS).flatMap(key => SOUNDS[key].files.map(file => this.load(file)));
+        const promises = Object.keys(SOUNDS).flatMap(key => SOUNDS[key as SoundName].files.map(file => this.load(file)));
         await Promise.all(promises);
     }
-    static play(sfxName) {
+    static play(sfxName: SoundName) {
         const sound = SOUNDS[sfxName];
         if (sound) {
             const filename = sound.files[Math.floor(Math.random() * sound.files.length)];
@@ -139,13 +141,14 @@ export class BufferLoader {
         }
     }
     static startAtmo() {
-        document.querySelector('audio.atmo').play();
+        document.querySelector<HTMLAudioElement>('audio.atmo')!.play();
     }
     static stopAtmo() {
-        document.querySelector('audio.atmo').pause();
+        document.querySelector<HTMLAudioElement>('audio.atmo')!.pause();
     }
 }
 
+export type SoundName = keyof typeof SOUNDS;
 const SOUNDS = {
     tankExplosion: {
         files: ['static/audio/zapsplat/Blastwave_FX_CarExplosionDebris_HV.132.mp3'],

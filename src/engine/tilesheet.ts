@@ -1,3 +1,11 @@
+export interface TilesheetEntry {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotation: number;
+}
+
 const ingameTileSize = 128;
 const PI_HALF = .5 * Math.PI;
 
@@ -148,31 +156,44 @@ const menuTilesheet = {
     field1: { x: 2, y: 6 },
     field2: { x: 3, y: 6 },
 };
+type IngameTileName = keyof typeof ingameTilesheet;
+type MenuTileName = keyof typeof menuTilesheet;
+export type TileName = (IngameTileName | MenuTileName);
+interface TileSrcItem {
+    x: number,
+    y: number,
+    width?: number,
+    height?: number,
+    rotation?: number,
+}
 
 /** Defines the locations of the images on the tilesheet */
-const tilesheet = {};
-Object.keys(ingameTilesheet).forEach(tileName => {
-    const { x, y, width, height, rotation } = ingameTilesheet[tileName];
-    const offX = width ? (ingameTileSize - width) / 2 : 0;
-    const offY = height ? (ingameTileSize - height) / 2 : 0;
-    tilesheet[tileName] = {
-        x: x * ingameTileSize + offX,
-        y: y * ingameTileSize + offY,
-        width: width || ingameTileSize,
-        height: height || ingameTileSize,
-        // set rotation if the original image does not look to the right
-        rotation: rotation || 0,
-    }
-});
+function getTilesheet(): {[key in TileName]: TilesheetEntry} {
+    let tilesheet: {[key: string]: TilesheetEntry} = {};
+    Object.keys(ingameTilesheet).forEach(tileName => {
+        const { x, y, width, height, rotation } = ingameTilesheet[tileName as IngameTileName] as TileSrcItem;
+        const offX = width ? (ingameTileSize - width) / 2 : 0;
+        const offY = height ? (ingameTileSize - height) / 2 : 0;
+        tilesheet[tileName] = {
+            x: x * ingameTileSize + offX,
+            y: y * ingameTileSize + offY,
+            width: width || ingameTileSize,
+            height: height || ingameTileSize,
+            // set rotation if the original image does not look to the right
+            rotation: rotation || 0,
+        }
+    });
 
-Object.keys(menuTilesheet).forEach(tileName => {
-    const { x, y } = menuTilesheet[tileName];
-    tilesheet[tileName] = {
-        x: x * 1.5 * menuTileSize + menuTilesheetOffsetX,
-        y: y * 1.5 * menuTileSize + menuTilesheetOffsetY,
-        width: menuTileSize,
-        height: menuTileSize,
-        rotation: 0,
-    };
-});
-export { tilesheet };
+    Object.keys(menuTilesheet).forEach(tileName => {
+        const { x, y } = menuTilesheet[tileName as MenuTileName];
+        tilesheet[tileName] = {
+            x: x * 1.5 * menuTileSize + menuTilesheetOffsetX,
+            y: y * 1.5 * menuTileSize + menuTilesheetOffsetY,
+            width: menuTileSize,
+            height: menuTileSize,
+            rotation: 0,
+        };
+    });
+    return tilesheet as {[key in TileName]: TilesheetEntry};
+}
+export const tilesheet = getTilesheet();

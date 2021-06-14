@@ -1,0 +1,27 @@
+{
+  "name": "tower-defense-game",
+  "version": "1.0.0",
+  "description": "A classic tower defense game",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyd3r/tower-defense-game.git"
+  },
+  "keywords": [
+    "tower-defense",
+    "game",
+    "canvas"
+  ],
+  "author": "cyd3r",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cyd3r/tower-defense-game/issues"
+  },
+  "homepage": "https://github.com/cyd3r/tower-defense-game#readme",
+  "devDependencies": {
+    "typescript": "^4.3.2"
+  }
+}

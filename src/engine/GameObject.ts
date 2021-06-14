@@ -1,8 +1,21 @@
-import { GameEngine } from './GameEngine.js';
-import { tilesheet } from './tilesheet.js';
-import { Vector } from './Vector.js';
+import { GameEngine } from './GameEngine';
+import { TileName, tilesheet, TilesheetEntry } from './tilesheet';
+import { Vector, XY } from './Vector';
 
-export class GameObject {
+export interface Drawable {
+    isDestroyed: boolean;
+    draw: (ctx: CanvasRenderingContext2D, tilesheet: CanvasImageSource) => void;
+}
+
+export class GameObject implements Drawable {
+    width: number;
+    height: number;
+    tileData: TilesheetEntry;
+    isDestroyed: boolean;
+
+    private _forward: Vector;
+    private _position: Vector;
+
     /** Creates a new GameObject
      * @param x x position of center on canvas
      * @param y y position of center on canvas
@@ -12,15 +25,15 @@ export class GameObject {
      * This is then used to get the image onto the canvas.
      * @param rotation (optional) initial rotation
      */
-    constructor(x, y, width, height, tileName, drawLayer, rotation) {
+    constructor(x: number, y: number, width: number, height: number, tileName: TileName, drawLayer: string, rotation: number) {
         this.width = width;
         this.height = height;
 
-        this.position = new Vector(x, y);
+        this._position = new Vector(x, y);
         if (rotation === undefined) {
-            this.forward = new Vector(1, 0);
+            this._forward = new Vector(1, 0);
         } else {
-            this.forward = Vector.fromRotation(rotation);
+            this._forward = Vector.fromRotation(rotation);
         }
 
         this.tileData = tilesheet[tileName];
@@ -30,7 +43,7 @@ export class GameObject {
         }
 
         this.isDestroyed = false;
-        GameEngine.singleton.registerDrawable(this, drawLayer);
+        GameEngine.singleton!.registerDrawable(this, drawLayer);
     }
 
     /** @deprecated Use `position` instead */
@@ -42,10 +55,10 @@ export class GameObject {
     /** @deprecated Use `position` instead */
     set y(value) { this.position.y = value; }
     
-    setTileData(tileName){ this.tileData = tilesheet[tileName]}
-    getPosition(){return this.position;};
+    setTileData(tileName: TileName){ this.tileData = tilesheet[tileName]}
 
-    /** @type {Vector} */
+    get position() { return this._position; }
+    set position(value) { this._position = value; }
     get forward() {
         return this._forward;
     }
@@ -59,7 +72,7 @@ export class GameObject {
      * @param forwards Distance to move along the look direction
      * @param sidewards Distance to move to the right of the look direction
     */
-     move(forwards, sidewards) {
+     move(forwards: number, sidewards: number) {
         this.position = this.position.add(new Vector(-sidewards, forwards).relativeTo(this.forward));
     }
 
@@ -68,13 +81,7 @@ export class GameObject {
      * @param deltaRotation The maximum rotation allowed (in radians)
      * @param _compat Don't use this parameter. Only exists for backwards compatibility
     */
-    lookAt(target, deltaRotation, _compat) {
-        if (_compat) {
-            console.warn('deprecated, use Vector instead');
-            target = new Vector(target, deltaRotation);
-            deltaRotation = _compat;
-        }
-
+    lookAt(target: Vector, deltaRotation: number) {
         this.forward = this.forward.norm();
         const targetForward = target.sub(this.position).norm();
 
@@ -92,7 +99,7 @@ export class GameObject {
     destroy() {
         this.isDestroyed = true;
     }
-    draw(ctx, tilesheetImg) {
+    draw(ctx: CanvasRenderingContext2D, tilesheetImg: CanvasImageSource) {
         // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/rotate#rotating_a_shape_around_its_center
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.forward.toRotation() + this.tileData.rotation);
@@ -114,12 +121,11 @@ export class GameObject {
         ];
     }
 
-    /** @param {GameObject} other */
-    collidesWith(other) {
+    collidesWith(other: GameObject) {
         return rectanglesIntersect(this.getCollisionBox(), other.getCollisionBox());
     }
 
-    unrotatedBoxContains(point) {
+    unrotatedBoxContains(point: XY) {
         const { x, y } = point;
         return x > this.position.x - .5 * this.width && x < this.position.x + .5 * this.width && y > this.position.y - .5 * this.height && y < this.position.y + .5 * this.height;
     }
@@ -127,8 +133,10 @@ export class GameObject {
 
 /** Like `GameObject` but follows a parent `GameObject`'s position and rotation */
 export class ChildGameObject extends GameObject {
-    /** @param {GameObject} parent */
-    constructor(parent, x, y, width, height, tileName, drawLayer, rotation) {
+    localPosition: Vector;
+    localForward: Vector;
+    parent?: GameObject;
+    constructor(parent: GameObject, x: number, y: number, width: number, height: number, tileName: TileName, drawLayer: string, rotation: number) {
         super(x, y, width, height, tileName, drawLayer, rotation);
         this.localPosition = this.position;
         this.localForward = this.forward;
@@ -168,23 +176,9 @@ export class ChildGameObject extends GameObject {
     }
 }
 
-export class MovingGameObject extends GameObject {
-    constructor(x, y, width, height, tileName, forwardVelocity, sidewardsVelocity) {
-        super(x, y, width, height, tileName)
-        this.forwardVelocity = forwardVelocity;
-        this.sidewardsVelocity = sidewardsVelocity;
-    }
-
-    update() {
-        this.move(this.forwardVelocity, this.sidewardsVelocity);
-    }
-}
-
 /** Checks if to rectangles `a` and `b` intersect. The rectangles are given as a list of the 4 corners
- * @param {Vector[]} a
- * @param {Vector[]} b
  */
- function rectanglesIntersect (a, b) {
+ function rectanglesIntersect (a: Vector[], b: Vector[]) {
     // simplified version of https://stackoverflow.com/a/12414951
     for (let polygon of [a, b]) {
         // for each polygon, look at each edge of the polygon, and determine if it separates

@@ -1,4 +1,7 @@
-import { Vector } from './Vector.js';
+import { Drawable, GameObject } from './GameObject';
+import { Vector } from './Vector';
+type UpdateCallback = () => void;
+type ClickCallback = (position: Vector) => void;
 
 // if the frames are more apart than SAFE_DELTATIME, the canvas is not drawn ATM
 // therefore, relying on deltaTime will result in very weird consequences (e.g. enemies overshooting the path)
@@ -6,21 +9,44 @@ import { Vector } from './Vector.js';
 const SAFE_DELTATIME = .2;
 
 export class GameEngine {
-    /** @type {GameEngine} */
-    static singleton = undefined;
+    private static _singleton?: GameEngine;
+
+    static get singleton(): GameEngine {
+        if (GameEngine._singleton === undefined) {
+            throw 'Singleton is not defined yet';
+        }
+        return GameEngine._singleton;
+    }
+
+    private hasError: boolean = false;
+    private screen: HTMLCanvasElement;
+    private renderContext: CanvasRenderingContext2D;
+    private lastUpdateTime: number;
+    cursorPosition: Vector;
+    private deltaTime: number = 0;
+    private timeSinceStartup: number = 0;
+    private onUpdate: UpdateCallback;
+    private onClick: ClickCallback;
+    private layers: string[];
+    private drawables: {[key: string]: Drawable[]}
+    private tilesheet: CanvasImageSource;
+
     /** Creates a new engine
      * @param screen The canvas element
      * @param tilesheet The tilesheet element
      * @param onUpdate Is called every frame
      * @param onClick Triggered when the player clicks on the canvas.
      * Parameter: relative position to the canvas as `Vector`
-     * @param {string[]} layers Sets the draw order for the layers. The first layers are drawn first.
+     * @param layers Sets the draw order for the layers. The first layers are drawn first.
      */
-    constructor(screen, tilesheet, onUpdate, onClick, layers) {
-        this.hasError = false;
+    constructor(screen: HTMLCanvasElement, tilesheet: CanvasImageSource, onUpdate: UpdateCallback, onClick: ClickCallback, layers: string[]) {
         this.screen = screen;
         this.tilesheet = tilesheet;
-        this.renderContext = this.screen.getContext('2d');
+        const ctx = this.screen.getContext('2d');
+        if (ctx === null) {
+            throw 'Could not get a render context from canvas';
+        }
+        this.renderContext = ctx;
 
         this.lastUpdateTime = performance.now();
         this.onUpdate = onUpdate;
@@ -40,10 +66,7 @@ export class GameEngine {
             this.cursorPosition = this.getMousePos(event);
         });
 
-        this.deltaTime = 0;
-        this.timeSinceStartup = 0;
-
-        GameEngine.singleton = this;
+        GameEngine._singleton = this;
     }
 
     /** Time since last frame in seconds */
@@ -65,7 +88,7 @@ export class GameEngine {
         return GameEngine.singleton.screen.height;
     }
 
-    getMousePos(event) {
+    getMousePos(event: MouseEvent) {
         // https://stackoverflow.com/a/17130415
         const rect = this.screen.getBoundingClientRect();
         const scaleX = this.screen.width / rect.width;
@@ -81,7 +104,7 @@ export class GameEngine {
         this.renderContext.clearRect(0, 0, this.screen.width, this.screen.height);
     }
 
-    registerDrawable(drawable, layer) {
+    registerDrawable(drawable: Drawable, layer: string) {
         if (this.drawables[layer] === undefined) {
             console.error(layer, 'is not a valid layer');
         } else if (typeof(drawable.isDestroyed) !== 'boolean') {

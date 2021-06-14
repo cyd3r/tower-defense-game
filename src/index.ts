@@ -1,25 +1,31 @@
-import { GameEngine } from './engine/GameEngine.js';
+import { BufferLoader, GameEngine, Vector } from './engine';
 import { Menu } from './Menu.js';
 import { ParticleEmitter } from './Particles.js';
 import { SoldierRagdoll } from './Enemy.js';
-import { BufferLoader } from './engine/BufferLoader.js';
 import { Projectile } from './Projectile.js';
+import { Level } from './Level.js';
 
 // enable back button after history.pushState
 // https://stackoverflow.com/a/66104582
 window.addEventListener('popstate', () => {
-    window.location = location.href;
+    window.location.href = location.href;
 });
 
 const LIFES = 3;
-document.querySelector('.play-again').addEventListener('click', () => location.reload());
-document.querySelector('.back-to-map').addEventListener('click', () => location.search = '');
-document.querySelector('.open-map').addEventListener('click', () => location.search = '');
+document.querySelector('.play-again')!.addEventListener('click', () => location.reload());
+document.querySelector('.back-to-map')!.addEventListener('click', () => location.search = '');
+document.querySelector('.open-map')!.addEventListener('click', () => location.search = '');
 
 class GameLogic {
+    private engine: GameEngine;
+    private bufferLoader: BufferLoader;
+    private state: 'menu' | 'level' | 'gameover';
+    private menu: Menu
+    private level?: Level
+
     constructor() {
-        const screen = document.querySelector('#screen');
-        const tilesheet = document.querySelector('#tilesheet');
+        const screen = document.querySelector<HTMLCanvasElement>('#screen')!;
+        const tilesheet = document.querySelector<HTMLImageElement>('#tilesheet')!;
         this.engine = new GameEngine(screen, tilesheet,
             this.update.bind(this), this.click.bind(this),
             // this is the order in which the gameobjects are drawn
@@ -28,7 +34,6 @@ class GameLogic {
         this.bufferLoader = new BufferLoader();
         this.bufferLoader.loadAll().catch(console.error);
 
-        /** @type {'menu' | 'level' | 'gameover'} */
         this.state = 'menu';
         this.menu = new Menu();
 
@@ -39,7 +44,7 @@ class GameLogic {
             this.loadLevel(parseInt(levelIndex));
         } else {
             this.level = undefined;
-            document.querySelector('.logo').innerText = 'Tower Defense';
+            document.querySelector<HTMLElement>('.logo')!.innerText = 'Tower Defense';
         }
     }
 
@@ -47,24 +52,27 @@ class GameLogic {
         this.engine.gameLoop();
     }
 
-    loadLevel(levelIndex) {
+    loadLevel(levelIndex: number) {
         if (levelIndex >= 0 && levelIndex < this.menu.levelList.length) {
-            this.level = this.menu.loadLevel(levelIndex);
-            this.state = 'level';
-            document.querySelector('.towers').classList.remove('hidden');
-            document.querySelector('.logo').innerText = `Level ${levelIndex + 1}: ${this.level.name}`;
+            const level = this.menu.loadLevel(levelIndex);
+            if (level) {
+                this.level = level;
+                this.state = 'level';
+                document.querySelector('.towers')!.classList.remove('hidden');
+                document.querySelector<HTMLElement>('.logo')!.innerText = `Level ${levelIndex + 1}: ${this.level.name}`;
+            }
         }
     }
 
     /** Triggered when the user clicks on the canvas. */
-    click(position) {
+    click(position: Vector) {
         switch(this.state){
             case 'menu':
                 const levelIndex = this.menu.hoveredLevelIndex;
                 this.loadLevel(levelIndex);
                 break;
             case 'level':
-                this.level.click(position);
+                this.level?.click(position);
                 break;
         }
     }
@@ -73,15 +81,15 @@ class GameLogic {
         this.level?.wave.update();
         this.level?.towerGrid.update(this.level.wave.enemies);
         if (this.state === 'level') {
-            const overlay = document.querySelector('.overlay');
-            const gameoverText = overlay.querySelector('.gameover-text');
-            if (this.level.wave.reachedBaseCount >= LIFES) {
+            const overlay = document.querySelector('.overlay')!;
+            const gameoverText = overlay.querySelector<HTMLElement>('.gameover-text')!;
+            if (this.level!.wave.reachedBaseCount >= LIFES) {
                 this.state = 'gameover';
                 overlay.classList.remove('hidden');
                 BufferLoader.play('gameOverLost');
                 BufferLoader.stopAtmo();
                 gameoverText.innerText = 'You failed to defend the base';
-            } else if (this.level.wave.isDefeated) {
+            } else if (this.level!.wave.isDefeated) {
                 this.state = 'gameover';
                 overlay.classList.remove('hidden');
                 BufferLoader.play('gameOverVictory');
@@ -89,12 +97,12 @@ class GameLogic {
                 gameoverText.innerText = 'Base secured!';
             }
 
-            this.level.towerGrid.previewTower(
+            this.level!.towerGrid.previewTower(
                 GameEngine.singleton.cursorPosition,
-                !!this.level.wallet.towerToBuild,
-                this.level.terrain.getTileAt(GameEngine.singleton.cursorPosition),
-                this.level.wallet.towerToBuild?.range,
-                this.level.wallet.towerToBuild?.innerRange,
+                !!this.level!.wallet.towerToBuild,
+                this.level!.terrain.getTileAt(GameEngine.singleton.cursorPosition),
+                this.level!.wallet.towerToBuild?.range,
+                this.level!.wallet.towerToBuild?.innerRange,
             );
         }
         if (this.level) {
@@ -110,5 +118,6 @@ class GameLogic {
 
 
 
-window.game = new GameLogic();
-window.game.start();
+const game = new GameLogic();
+(window as any).game = game;
+game.start();
