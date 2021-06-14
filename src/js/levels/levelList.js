@@ -41,11 +41,11 @@ Make sure that the soldiers don't reach your base!
 # Coins
 You need a lot of coins to build defense towers.
 Build at least *three factories* to get more coins.
-! ./src/images/tower-defense-top-down/coinTower.png 64px
+! static/images/tower-defense-top-down/coinTower.png 64px
 When a coin appears, *click* on it to *collect* it.
 # AAC
 The AAC is a good choice to take care of *fast* or *weak* enemies.
-! ./src/images/tower-defense-top-down/AAC.png 64px
+! static/images/tower-defense-top-down/AAC.png 64px
 `,
 },
 {
@@ -84,10 +84,10 @@ oO     . ## O`),
 # Don't forget: Coins
 It's of great importance that you have *many coins*. So build as many *factories* as you can.
 # Scout
-! ./src/images/tower-defense-top-down/scout.png
+! static/images/tower-defense-top-down/scout.png
 Scouts are *very fast* and only AACs can reliably hit them.
 To slow them down, you should build *poison fields*.
-! ./src/images/tower-defense-top-down/slowdownArea.png 64px`,
+! static/images/tower-defense-top-down/slowdownArea.png 64px`,
 },
 {
   name: "Robots",
@@ -153,10 +153,10 @@ O  xx  ,  xx
   ],
   hints: `
 # Robots
-! ./src/images/tower-defense-top-down/robot.png 64px
+! static/images/tower-defense-top-down/robot.png 64px
 Robots are nasty foes. They can withstand a considerable amount of damage and to make matters worse, they walk faster in *poison fields*.
 Because they *move slowly*, robots can be hit by *rockets*.
-! ./src/images/tower-defense-top-down/doubleRocketTower.png 64px
+! static/images/tower-defense-top-down/doubleRocketTower.png 64px
 # Coins
 If you are overrun at some time, it's maybe because you haven't built enough *factories*.
 Try it with at least *five factories*.`,
@@ -253,13 +253,13 @@ xxxx   xxxxx
   ],
   hints: `
 # Cannon
-! ./src/images/tower-defense-top-down/cannon.png 64px
+! static/images/tower-defense-top-down/cannon.png 64px
 The cannon can't target enemies directly. Instead it fires always in the *same direction*. *Click* on the canon to *rotate* it.
 The cannonballs deal a *good amount of damage* and *fly through most enemies*! This makes the cannon very *effective* against *groups of enemies* that are walking in a row.
 Try to build the cannon somewhere where it can reach *long parts* of the road.
 # Tanks
 Uh-oh... Are the tanks coming?
-! ./src/images/tower-defense-top-down/tankGreen.png 80px
+! static/images/tower-defense-top-down/tankGreen.png 80px
 tanks are *extremely tough*. Best to attack them with *Doublerockets* or *Cannons*.
 `,
 },
@@ -331,11 +331,11 @@ o  *, *  ##`),
   ],
   hints: `
 # Planes
-! ./src/images/tower-defense-top-down/planeGreen.png 64px
+! static/images/tower-defense-top-down/planeGreen.png 64px
 Planes fly *directly* towards your base. Because they are airborne, they are not affected by *poison fields*, *cannons*, and *tesla towers*.
 *AACs* are a good choice.
 Planes will appear at a location, marked with this symbol on the ground:
-! ./src/images/tower-defense-top-down/planeSpawn.png 64px`,
+! static/images/tower-defense-top-down/planeSpawn.png 64px`,
 },
 {
   name: "First aid",
@@ -482,11 +482,11 @@ xxxx  xx  xx
 # Plan
 Before you start the wave, you should *make a plan*. Different towers shine at different positions.
 # Healer
-! ./src/images/tower-defense-top-down/cyborg.png 64px
+! static/images/tower-defense-top-down/cyborg.png 64px
 Healer can *regenerate* the *hitpoints* of *nearby* enemies. They can't heal themselves.
 # Homing missiles
 Homing missiles deal *extremely high damage* and destroy everything nearby upon impact.
-! ./src/images/tower-defense-top-down/HomingMissileTower.png 64px
+! static/images/tower-defense-top-down/HomingMissileTower.png 64px
 Build *missile silos*, to fire *homing missiles*. However, missile silos *can't target nearby enemies* and should be *placed in a safe distance*.
 Missile silos are *expensive*, a good supply of coins is key.`,
 },
@@ -581,7 +581,7 @@ P,xxxxxxxxxo,
 # Bombers
 Bombers are heavily armoured planes that fly slowly. Take care of them quickly using *AACs* and other towers.
 # Tesla towers
-! ./src/images/tower-defense-top-down/electroTower.png 64px
+! static/images/tower-defense-top-down/electroTower.png 64px
 Tesla towers have to be built on *both sides* of the road and generate an electric barrier that *slows down* passing enemies and *damages* them. Why do the soldiers walk through there anyway you ask? No idea.
 Keep in mind that *planes are not affected* because they fly, duh.
 # Build factories!

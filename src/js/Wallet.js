@@ -26,7 +26,7 @@ export class Wallet {
             btn.title = TowerType.name;
 
             const img = document.createElement('img');
-            img.src = `./src/images/tower-defense-top-down/${TowerType.iconName}.png`;
+            img.src = `static/images/tower-defense-top-down/${TowerType.iconName}.png`;
             img.width = 50;
             btn.appendChild(img);
 

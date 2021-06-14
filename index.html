@@ -2,7 +2,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <link rel="stylesheet" href="src/css/main.css">
+        <link rel="stylesheet" href="static/css/main.css">
         <title>Tower Defense</title>
     </head>
     <body>
@@ -23,19 +23,19 @@
                 <div class="towers hidden">
                     <button class="open-map">Map</button>
                     <div class="lives">
-                        <img src="./src/images/platformer-pack-redux/hudHeart_full.png">
-                        <img src="./src/images/platformer-pack-redux/hudHeart_full.png">
-                        <img src="./src/images/platformer-pack-redux/hudHeart_full.png">
+                        <img src="static/images/platformer-pack-redux/hudHeart_full.png">
+                        <img src="static/images/platformer-pack-redux/hudHeart_full.png">
+                        <img src="static/images/platformer-pack-redux/hudHeart_full.png">
                     </div>
 
                     <div class="coins">
-                        <img src="./src/images/platformer-pack-redux/hudCoin.png">
+                        <img src="static/images/platformer-pack-redux/hudCoin.png">
                         <span class="my-coins"></span>
                     </div>
 
                     <div class="tower-entry">
                         <button class="tower-button demolish">
-                            <img src="./src/images/tower-defense-top-down/towerDefense_tile287.png" width="50">
+                            <img src="static/images/tower-defense-top-down/towerDefense_tile287.png" width="50">
                         </button>
                         <div class="tower-details">
                             <h2 class="white-shadow">Sell</h2>
@@ -57,14 +57,14 @@
         </div>
 
         <div class="credits">
-            <p><a href="/credits.html">Credits</a></p>
+            <p><a href="credits.html">Credits</a></p>
         </div>
 
-        <audio class="atmo" loop src="src/audio/zapsplat/smartsound_ATMO_NATURE_Country_Birds_Call_01.mp3"></audio>
+        <audio class="atmo" loop src="static/audio/zapsplat/smartsound_ATMO_NATURE_Country_Birds_Call_01.mp3"></audio>
         <!-- atmo is just there to fill the void, no high volume required -->
         <script>document.querySelector('.atmo').volume = 0.1;</script>
         <!-- required to load tilesheet inside the canvas -->
-        <img style="display: none" id="tilesheet" src="src/images/tilesheet.png">
+        <img style="display: none" id="tilesheet" src="static/images/tilesheet.png">
     </body>
     <script type="module" src="src/js/index.js"></script>
 </html>

@@ -148,103 +148,103 @@ export class BufferLoader {
 
 const SOUNDS = {
     tankExplosion: {
-        files: ['./src/audio/zapsplat/Blastwave_FX_CarExplosionDebris_HV.132.mp3'],
+        files: ['static/audio/zapsplat/Blastwave_FX_CarExplosionDebris_HV.132.mp3'],
         volume: 0.5,
     },
     planeDestroy: {
         files: [
-            'src/audio/zapsplat/zapsplat_vehicles_plane_light_prop_crash_explode_ext_001_31740.mp3',
-            'src/audio/zapsplat/zapsplat_vehicles_plane_light_prop_crash_explode_ext_002_31741.mp3',
-            'src/audio/zapsplat/zapsplat_vehicles_plane_light_prop_crash_explode_ext_003_31742.mp3',
+            'static/audio/zapsplat/zapsplat_vehicles_plane_light_prop_crash_explode_ext_001_31740.mp3',
+            'static/audio/zapsplat/zapsplat_vehicles_plane_light_prop_crash_explode_ext_002_31741.mp3',
+            'static/audio/zapsplat/zapsplat_vehicles_plane_light_prop_crash_explode_ext_003_31742.mp3',
         ],
         volume: 0.25,
     },
     missileLaunch: {
         files: [
-            './src/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_001_62721.mp3',
-            './src/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_002_62722.mp3',
-            './src/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_003_62723.mp3',
-            './src/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_004_62724.mp3',
-            './src/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_005_62725.mp3',
-            './src/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_006_62726.mp3',
-            './src/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_007_62727.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_001_62721.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_002_62722.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_003_62723.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_004_62724.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_005_62725.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_006_62726.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_missile_rocket_small_launch_fizz_whoosh_007_62727.mp3',
         ],
         volume: 0.3,
     },
     cannonFire: {
         files: [
-            './src/audio/zapsplat/zapsplat_warfare_mortar_projectile_launch_001_25231.mp3',
-            './src/audio/zapsplat/zapsplat_warfare_mortar_projectile_launch_002_25232.mp3',
-            './src/audio/zapsplat/zapsplat_warfare_mortar_projectile_launch_003_25233.mp3',
-            './src/audio/zapsplat/zapsplat_warfare_mortar_projectile_launch_004_25234.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_mortar_projectile_launch_001_25231.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_mortar_projectile_launch_002_25232.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_mortar_projectile_launch_003_25233.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_mortar_projectile_launch_004_25234.mp3',
         ],
         volume: 0.5,
     },
     towerBoot: {
         files: [
-            './src/audio/zapsplat/PM_FSSF2_WEAPONS_J4_FOLEY_RELOAD_PICKUP_HANDLING_326.mp3',
+            'static/audio/zapsplat/PM_FSSF2_WEAPONS_J4_FOLEY_RELOAD_PICKUP_HANDLING_326.mp3',
         ],
         volume: 0.5,
     },
     coin: {
         files: [
-            './src/audio/kenney_rpgaudio/handleCoins.ogg',
-            './src/audio/kenney_rpgaudio/handleCoins2.ogg',
+            'static/audio/kenney_rpgaudio/handleCoins.ogg',
+            'static/audio/kenney_rpgaudio/handleCoins2.ogg',
         ],
         volume: 0.5,
     },
     missileImpact: {
         files: [
-            './src/audio/zapsplat/zapsplat_science_fictyion_explosion_puff_smoke_medium_001_45027.mp3',
-            './src/audio/zapsplat/zapsplat_science_fictyion_explosion_puff_smoke_medium_002_45028.mp3'
+            'static/audio/zapsplat/zapsplat_science_fictyion_explosion_puff_smoke_medium_001_45027.mp3',
+            'static/audio/zapsplat/zapsplat_science_fictyion_explosion_puff_smoke_medium_002_45028.mp3'
         ],
         volume: 0.5,
     },
     waveStarted: {
-        files: ['./src/audio/kenney_voiceoverfighter/begin.ogg'],
+        files: ['static/audio/kenney_voiceoverfighter/begin.ogg'],
         volume: 0.5,
     },
     gameOverVictory: {
-        files: ['./src/audio/kenney_voiceoverfighter/you_win.ogg'],
+        files: ['static/audio/kenney_voiceoverfighter/you_win.ogg'],
         volume: 0.5,
     },
     gameOverLost: {
-        files: ['./src/audio/kenney_voiceoverfighter/you_lose.ogg'],
+        files: ['static/audio/kenney_voiceoverfighter/you_lose.ogg'],
         volume: 0.5,
     },
     ouch: {
         files: [
-            'src/audio/zapsplat/zapsplat_human_male_grunt_ouch_pain_001_15714.mp3',
-            'src/audio/zapsplat/zapsplat_human_male_grunt_ouch_pain_002_15715.mp3',
+            'static/audio/zapsplat/zapsplat_human_male_grunt_ouch_pain_001_15714.mp3',
+            'static/audio/zapsplat/zapsplat_human_male_grunt_ouch_pain_002_15715.mp3',
         ],
         volume: 0.5,
     },
     baseReached: {
         files: [
-            './src/audio/zapsplat/ftus_musical_instrument_gong_small_gamelan_hit_soft_001_524.mp3',
-            './src/audio/zapsplat/ftus_musical_instrument_gong_small_gamelan_hit_soft_002_525.mp3',
-            './src/audio/zapsplat/ftus_musical_instrument_gong_small_gamelan_hit_soft_003_526.mp3',
+            'static/audio/zapsplat/ftus_musical_instrument_gong_small_gamelan_hit_soft_001_524.mp3',
+            'static/audio/zapsplat/ftus_musical_instrument_gong_small_gamelan_hit_soft_002_525.mp3',
+            'static/audio/zapsplat/ftus_musical_instrument_gong_small_gamelan_hit_soft_003_526.mp3',
         ],
         volume: 0.5,
     },
     aacImpactFlesh: {
         files: [
-            'src/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_001_61704.mp3',
-            'src/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_002_61705.mp3',
-            'src/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_003_61706.mp3',
-            'src/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_004_61707.mp3',
-            'src/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_005_61708.mp3',
-            'src/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_006_61709.mp3',
-            'src/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_007_61710.mp3',
+            'static/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_001_61704.mp3',
+            'static/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_002_61705.mp3',
+            'static/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_003_61706.mp3',
+            'static/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_004_61707.mp3',
+            'static/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_005_61708.mp3',
+            'static/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_006_61709.mp3',
+            'static/audio/zapsplat/zapsplat_foley_clothing_thick_jacket_punch_sweetener_007_61710.mp3',
         ],
         volume: 0.02,
     },
     aacImpactMetal: {
         files: [
-            'src/audio/zapsplat/zapsplat_warfare_bullet_hit_metal_001_43600_edit.mp3',
-            'src/audio/zapsplat/zapsplat_warfare_bullet_hit_metal_002_43601_edit.mp3',
-            'src/audio/zapsplat/zapsplat_warfare_bullet_hit_metal_003_43602_edit.mp3',
-            'src/audio/zapsplat/zapsplat_warfare_bullet_hit_metal_004_43603_edit.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_bullet_hit_metal_001_43600_edit.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_bullet_hit_metal_002_43601_edit.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_bullet_hit_metal_003_43602_edit.mp3',
+            'static/audio/zapsplat/zapsplat_warfare_bullet_hit_metal_004_43603_edit.mp3',
         ],
         volume: 0.01,
     }

@@ -45,9 +45,9 @@ export class Wave {
     updateHearts() {
         for (let i = 0; i < 3; i += 1) {
             if (2 - i < this.reachedBaseCount) {
-                this.hearts[i].src = './src/images/platformer-pack-redux/hudHeart_empty.png';
+                this.hearts[i].src = 'static/images/platformer-pack-redux/hudHeart_empty.png';
             } else {
-                this.hearts[i].src = './src/images/platformer-pack-redux/hudHeart_full.png';
+                this.hearts[i].src = 'static/images/platformer-pack-redux/hudHeart_full.png';
             }
         }
     }
