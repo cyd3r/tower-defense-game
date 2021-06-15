@@ -100,7 +100,7 @@ class GameLogic {
             this.level!.towerGrid.previewTower(
                 GameEngine.singleton.cursorPosition,
                 !!this.level!.wallet.towerToBuild,
-                this.level!.terrain.getTileAt(GameEngine.singleton.cursorPosition),
+                this.level!.terrain.getTileAt(GameEngine.singleton.cursorPosition)?.buildable ?? false,
                 this.level!.wallet.towerToBuild?.range,
                 this.level!.wallet.towerToBuild?.innerRange,
             );

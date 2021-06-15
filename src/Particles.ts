@@ -1,10 +1,35 @@
-import { GameEngine } from './engine/GameEngine.js';
-import { GameObject } from './engine/GameObject.js';
-import { Vector } from './engine/Vector.js';
+import { Drawable, GameEngine, GameObject, Vector } from './engine';
 import { Wave } from './Wave.js';
 
+type RadiusGetter = (t: number) => number;
+type ColorGetter = (t: number) => number[];
+type DestinationGetter = () => Vector;
+type RotationGetter = () => number;
+
+interface ParticleConfig {
+    maxAge?: number;
+    numParticles?: number;
+    color: ColorGetter;
+    radius: RadiusGetter;
+    destination: DestinationGetter;
+    rotationVelocity: RotationGetter;
+    emitFreq: number;
+    particleAge: number;
+}
+
 class Pentagon {
-    constructor(center, getRadius, getColor, destination, rotationVelocity, maxAge) {
+    private orig: Vector;
+    private center: Vector;
+    private destination: Vector;
+    private rotationVelocity: number;
+    private rotation: number;
+    private getRadius: RadiusGetter;
+    private getColor: ColorGetter;
+    maxAge: number;
+    createdAt: number;
+    private color: number[];
+    private radius: number;
+    constructor(center: Vector, getRadius: RadiusGetter, getColor: ColorGetter, destination: Vector, rotationVelocity: number, maxAge: number) {
         this.orig = center;
         this.center = center;
         this.destination = destination;
@@ -26,7 +51,7 @@ class Pentagon {
         this.radius = this.getRadius(t);
         this.color = this.getColor(t);
     }
-    draw(ctx) {
+    draw(ctx: CanvasRenderingContext2D) {
         const color = `rgba(${this.color.join(',')})`;
         const delta = 2 * Math.PI / 5;
     
@@ -45,8 +70,23 @@ class Pentagon {
     }
 }
 
-export class ParticleEmitter {
-    static all = [];
+export class ParticleEmitter implements Drawable {
+    static all: ParticleEmitter[] = [];
+    private pentagons: Pentagon[];
+    private lastEmitTime: number;
+    private createdAt: number;
+    center: Vector;
+    private counter: number;
+    forward: Vector;
+    private maxAge?: number;
+    private numParticles?: number;
+    private getColor: ColorGetter;
+    private getRadius: RadiusGetter;
+    private getDestination: DestinationGetter;
+    private getRotationVelocity: RotationGetter;
+    private emitFreq: number;
+    private particleAge: number;
+    isDestroyed: boolean;
     static updateAll() {
         const now = GameEngine.timeSinceStartup;
         ParticleEmitter.all = ParticleEmitter.all.filter(emitter => {
@@ -60,14 +100,13 @@ export class ParticleEmitter {
     /** Creates a new `ParticleEmitter` and registers it so that `update` can be called automatically.
      * This is useful if the caller will be destroyed soon and cannot call update in the future (e.g. for exploding stuff).
     */
-    static create(center, forward, config) {
+    static create(center: Vector, forward: Vector, config: ParticleConfig) {
         const emitter = new ParticleEmitter(center, forward, config);
         this.all.push(emitter);
         return emitter;
     }
 
-    /** @param {GameObject} parent */
-    constructor(center, forward, config) {
+    constructor(center: Vector, forward: Vector, config: ParticleConfig) {
         this.pentagons = [];
         this.lastEmitTime = 0;
         this.createdAt = GameEngine.timeSinceStartup;
@@ -118,22 +157,25 @@ export class ParticleEmitter {
             return true;
         });
     }
-    draw(ctx) {
+    draw(ctx: CanvasRenderingContext2D) {
         this.pentagons.forEach(p => p.draw(ctx));
     }
 }
 
 export class HealingArea {
-    /** @param {GameObject} parent */
-    constructor(parent, radius, hitpointsPerSecond) {
+    private parent: GameObject;
+    private radius: number;
+    private hitpointsPerSecond: number;
+    isDestroyed: boolean;
+    constructor(parent: GameObject, radius: number, hitpointsPerSecond: number) {
         this.parent = parent;
         this.radius = radius;
         this.hitpointsPerSecond = hitpointsPerSecond;
         this.isDestroyed = false;
         GameEngine.singleton.registerDrawable(this, 'aura');
     }
-    update(deltaTime) {
-        Wave.singleton.enemies.forEach(enemy => {
+    update(deltaTime: number) {
+        Wave.singleton?.enemies.forEach(enemy => {
             if (enemy !== this.parent && this.parent.position.distanceTo(enemy.position) <= this.radius) {
                 enemy.hitpoints += this.hitpointsPerSecond * deltaTime;
             }
@@ -142,8 +184,7 @@ export class HealingArea {
     destroy() {
         this.isDestroyed = true;
     }
-    /** @param {CanvasRenderingContext2D} ctx */
-    draw(ctx) {
+    draw(ctx: CanvasRenderingContext2D) {
         const now = GameEngine.timeSinceStartup * 1000;
         const drawRadius = (now % 1000) / 1000 * this.radius;
         const alpha = .8*(1- (now % 1000) / 1000);

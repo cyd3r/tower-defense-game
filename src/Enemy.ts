@@ -1,12 +1,29 @@
-import { BufferLoader } from './engine/BufferLoader.js';
-import { GameEngine } from './engine/GameEngine.js';
-import { GameObject, ChildGameObject } from './engine/GameObject.js';
-import { Vector } from './engine/Vector.js';
-import { Healthbar } from './Healthbar.js';
-import { HealingArea } from './Particles.js';
-import { Terrain } from './Terrain.js';
+import { BufferLoader, ChildGameObject, GameEngine, GameObject, Vector } from './engine';
+import { TileName } from './engine/tilesheet';
+import { Healthbar } from './Healthbar';
+import { HealingArea } from './Particles';
+import { Terrain } from './Terrain';
 
-export const PRESETS = {
+interface Preset {
+    isSoldier?: boolean;
+    tileName: TileName;
+    tileNameTurret?: TileName;
+    shadow?: TileName;
+    slowVelocity?: number;
+    velocity: number;
+    width: number;
+    height: number;
+    hitpoints: number;
+    healthbarOffset: number;
+    destroySound: string;
+    heal?: {
+        radius: number;
+        hitpoints: number;
+    };
+    isMetal?: boolean;
+}
+
+export const PRESETS: {[key: string]: Preset} = {
     soldier: {
         isSoldier: true,
         tileName: 'soldier',
@@ -105,8 +122,16 @@ export const PRESETS = {
     }
 };
 
+interface EnvironmentEffect {
+    isElectrocuted?: boolean;
+    isSlowedDown?: boolean;
+}
+export interface Environment {
+    apply: (to: Enemy) => EnvironmentEffect | undefined;
+}
+
 /** @param {Terrain} terrain */
-export function createEnemy(enemyType, terrain) {
+export function createEnemy(enemyType: string, terrain: Terrain) {
     if (enemyType === 'tankGreen' || enemyType === 'tankSand') {
         return new EnemyTank(PRESETS[enemyType], terrain.getOffsetRoute());
     } else if (enemyType === 'planeGreen' || enemyType === 'planeBomber') {
@@ -116,7 +141,30 @@ export function createEnemy(enemyType, terrain) {
 }
 
 export class Enemy extends GameObject {
-    constructor(preset, route, drawLayer) {
+    private route: Vector[];
+    private routeTarget: number;
+    private velocity: number;
+    private slowVelocity: number;
+    maxHitpoints: number;
+    private _hitpoints: number;
+    private healthbar: Healthbar;
+    reachedBase: boolean;
+    private destroySound: any;
+    isMetal: boolean;
+    private healingArea?: HealingArea;
+    private drawAsElectrocuted: boolean;
+    private electroBlinkOffset: number;
+    protected electroDrawPosition: Vector;
+    protected electroAnchor: Vector;
+    protected wiggleAngle: number;
+    private randomWiggleOffset: number;
+    private ragdollOnDestroy: any;
+    aacArmor: number;
+    ignoreElectro: boolean;
+    blocksCannonBall: boolean;
+    flies: boolean;
+
+    constructor(preset: Preset, route: Vector[], drawLayer?: string) {
         super(route[0].x, route[0].y, preset.width, preset.height, preset.tileName, drawLayer ?? 'enemy', 0)
 
         this.route = route;
@@ -161,7 +209,7 @@ export class Enemy extends GameObject {
         return this._hitpoints;
     }
 
-    update(environments) {
+    update(environments: Environment[]) {
         if (this.isDestroyed) {
             return;
         }
@@ -182,7 +230,7 @@ export class Enemy extends GameObject {
         }
         this.lookAt(this.route[this.routeTarget], .1);
 
-        const effects = environments.reduce((effects, env) => ({
+        const effects = environments.reduce<EnvironmentEffect>((effects, env) => ({
             ...effects,
             ...env.apply(this),
         }), {});
@@ -193,7 +241,7 @@ export class Enemy extends GameObject {
         if (effects.isElectrocuted) {
             this.hitpoints -= 5 * GameEngine.deltaTime;
         }
-        this.drawAsElectrocuted = effects.isElectrocuted;
+        this.drawAsElectrocuted = !!effects.isElectrocuted;
 
         this.healingArea?.update(GameEngine.deltaTime);
     }
@@ -204,14 +252,14 @@ export class Enemy extends GameObject {
         this.healingArea?.destroy();
     }
 
-    rocketImpact(direction) {
+    rocketImpact(direction: Vector) {
         // spawn a ragdoll
         if (this.ragdollOnDestroy) {
             SoldierRagdoll.create(this.ragdollOnDestroy, this.position, this.forward, direction);
         }
     }
 
-    draw (ctx, tilesheet) {
+    draw (ctx: CanvasRenderingContext2D, tilesheet: CanvasImageSource) {
         const actualForward = this.forward;
 
         const now = GameEngine.timeSinceStartup;
@@ -260,14 +308,18 @@ export class Enemy extends GameObject {
 }
 
 export class EnemyTank extends Enemy {
-    constructor(preset, route) {
+    turret: any;
+    constructor(preset: Preset, route: Vector[]) {
+        if (preset.tileNameTurret === undefined) {
+            throw 'Tile for turret is missing';
+        }
         super(preset, route);
         this.turret = new ChildGameObject(this, 0, 0, 64, 64, preset.tileNameTurret, 'enemy');
         this.wiggleAngle = 0;
         this.aacArmor = .9;
         this.blocksCannonBall = true;
     }
-    update(environments) {
+    update(environments: Environment[]) {
         super.update(environments);
         this.turret.lookAt(GameEngine.singleton.cursorPosition, .02);
         // disable jittering when electrocuted (it's a tank!)
@@ -281,7 +333,7 @@ export class EnemyTank extends Enemy {
 }
 
 export class EnemyPlane extends Enemy {
-    constructor(preset, route) {
+    constructor(preset: Preset, route: Vector[]) {
         super(preset, route, 'plane');
         this.wiggleAngle = 0;
         // aac makes considerably more damage to planes
@@ -289,7 +341,7 @@ export class EnemyPlane extends Enemy {
         this.ignoreElectro = true;
         this.flies = true;
     }
-    draw(ctx, tilesheet) {
+    draw(ctx: CanvasRenderingContext2D, tilesheet: CanvasImageSource) {
         ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
         ctx.shadowOffsetX = 20;
         ctx.shadowOffsetY = 11;
@@ -300,17 +352,21 @@ export class EnemyPlane extends Enemy {
 
 const MAX_RAGDOLL_DISTANCE = 128;
 export class SoldierRagdoll extends GameObject {
-    static ragdolls = [];
+    static ragdolls: SoldierRagdoll[] = [];
+    impactDirection: Vector;
+    impactPoint: Vector;
+    velocity: number;
+    rotationSpeed: number;
     static updateAll() {
         SoldierRagdoll.ragdolls.forEach(ragdoll => ragdoll.update());
     }
 
-    static create(preset, position, forward, force) {
+    static create(preset: Preset, position: Vector, forward: Vector, force: Vector) {
         const ragdoll = new SoldierRagdoll(preset, position, forward, force);
         SoldierRagdoll.ragdolls.push(ragdoll);
     }
 
-    constructor(preset, position, forward, impactDirection) {
+    constructor(preset: Preset, position: Vector, forward: Vector, impactDirection: Vector) {
         super(position.x, position.y, preset.width, preset.height, preset.tileName, 'enemy', forward.toRotation());
         this.impactDirection = impactDirection;
         this.impactPoint = position;
@@ -326,7 +382,7 @@ export class SoldierRagdoll extends GameObject {
 
         this.forward = this.forward.rotate(this.rotationSpeed * GameEngine.deltaTime);
     }
-    draw(ctx, tilesheet) {
+    draw(ctx: CanvasRenderingContext2D, tilesheet: CanvasImageSource) {
         ctx.filter = `opacity(${(1 - this.position.distanceTo(this.impactPoint) / MAX_RAGDOLL_DISTANCE) * 100}%)`;
         const out = super.draw(ctx, tilesheet);
         ctx.filter = 'none';

@@ -25,7 +25,7 @@ export class GameObject implements Drawable {
      * This is then used to get the image onto the canvas.
      * @param rotation (optional) initial rotation
      */
-    constructor(x: number, y: number, width: number, height: number, tileName: TileName, drawLayer: string, rotation: number) {
+    constructor(x: number, y: number, width: number, height: number, tileName: TileName, drawLayer: string, rotation?: number) {
         this.width = width;
         this.height = height;
 
@@ -121,7 +121,7 @@ export class GameObject implements Drawable {
         ];
     }
 
-    collidesWith(other: GameObject) {
+    collidesWith(other: { getCollisionBox: () => Vector[] }) {
         return rectanglesIntersect(this.getCollisionBox(), other.getCollisionBox());
     }
 
@@ -131,12 +131,17 @@ export class GameObject implements Drawable {
     }
 }
 
+export interface GameObjectLike {
+    position: Vector;
+    forward: Vector;
+}
+
 /** Like `GameObject` but follows a parent `GameObject`'s position and rotation */
 export class ChildGameObject extends GameObject {
     localPosition: Vector;
     localForward: Vector;
-    parent?: GameObject;
-    constructor(parent: GameObject, x: number, y: number, width: number, height: number, tileName: TileName, drawLayer: string, rotation: number) {
+    parent?: GameObjectLike;
+    constructor(parent: GameObjectLike, x: number, y: number, width: number, height: number, tileName: TileName, drawLayer: string, rotation?: number) {
         super(x, y, width, height, tileName, drawLayer, rotation);
         this.localPosition = this.position;
         this.localForward = this.forward;

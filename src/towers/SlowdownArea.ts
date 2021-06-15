@@ -1,21 +1,27 @@
-import { GameEngine } from '../engine/GameEngine.js';
-import { ChildGameObject, GameObject } from '../engine/GameObject.js';
-import { interpolate, interpolateColor } from '../engine/util.js';
-import { Vector } from '../engine/Vector.js';
-import { ParticleEmitter } from '../Particles.js';
+import { implementsTowerStatic } from '.';
+import { Enemy, Environment } from '../Enemy';
+import { interpolate, interpolateColor, ChildGameObject, GameObject, GameEngine, Vector, Drawable } from '../engine';
+import { ParticleEmitter } from '../Particles';
 
-export class SlowdownArea extends GameObject {
+@implementsTowerStatic()
+export class SlowdownArea extends GameObject implements Environment {
     static cost = 10;
     static iconName = 'slowdownArea';
-    static name = 'Poison Field';
+    static displayName = 'Poison Field';
     static description = `Spray a toxic gas that slows down nearby enemies.
 Effective in combination with towers with slow projectiles.
 Robots walk faster in a Poison Field.`;
     static range = 2.2 * 64;
 
-    static all = [];
+    static all: SlowdownArea[] = [];
+    radius: number;
+    areaRenderer: AreaRenderer;
+    turret: ChildGameObject;
+    emitter: ParticleEmitter;
 
-    constructor(position) {
+    static build(position: Vector) { return new SlowdownArea(position); }
+
+    constructor(position: Vector) {
         super(position.x, position.y, 64, 64, 'socket2', 'tower');
         this.radius = SlowdownArea.range;
 
@@ -24,18 +30,18 @@ Robots walk faster in a Poison Field.`;
         this.areaRenderer = new AreaRenderer(this, this.radius);
         this.turret = new ChildGameObject(this, 0, 0, this.width, this.height, 'turret3', 'tower');
         this.emitter = new ParticleEmitter(this.turret.position, this.turret.forward, {
-            color: t => interpolateColor([4, 198, 7, 1], [121, 224, 98, 0], t),
+            color: (t: number) => interpolateColor([4, 198, 7, 1], [121, 224, 98, 0], t),
             destination: () => {
                 const angle = (Math.random() - .5) * Math.PI / 4;
                 return new Vector(this.radius * Math.sin(angle), this.radius * Math.cos(angle));
             },
-            radius: t => interpolate(10, 5, t),
+            radius: (t: number) => interpolate(10, 5, t),
             rotationVelocity: () => 3,
             emitFreq: .05,
             particleAge: 1,
         });
     }
-    apply(enemy) {
+    apply(enemy: Enemy) {
         if (enemy.position.distanceTo(this.position) <= this.radius) {
             return { isSlowedDown: true };
         }
@@ -59,8 +65,16 @@ Robots walk faster in a Poison Field.`;
     }
 }
 
-class AreaRenderer {
-    constructor(parent, radius) {
+class AreaRenderer implements Drawable {
+    parent: any;
+    segments: number;
+    step: number;
+    radius: any;
+    radiusJitter: number;
+    isDestroyed: boolean;
+    bootStartTime: number;
+    bootTime: number;
+    constructor(parent: GameObject, radius: number) {
         this.parent = parent;
         
         this.segments = 6;
@@ -77,7 +91,7 @@ class AreaRenderer {
     destroy() {
         this.isDestroyed = true;
     }
-    draw(ctx) {
+    draw(ctx: CanvasRenderingContext2D) {
         const end = [145, 206, 123];
         const start = [50, 132, 21];
         const now = GameEngine.timeSinceStartup;

@@ -1,9 +1,13 @@
-import { GameEngine } from '../engine/GameEngine.js';
-import { GameObject } from '../engine/GameObject.js';
+import { Drawable, GameEngine, GameObject } from '../engine';
 
-export class RangeRenderer {
-    /** @param {GameObject} parent */
-    constructor(parent, outerRange, innerRange) {
+export class RangeRenderer implements Drawable {
+    parent: GameObject;
+    outerRange?: number;
+    innerRange?: number;
+    isDestroyed: boolean;
+    show: boolean;
+
+    constructor(parent: GameObject, outerRange: number, innerRange?: number) {
         this.parent = parent;
         this.outerRange = outerRange;
         this.innerRange = innerRange;
@@ -14,8 +18,8 @@ export class RangeRenderer {
     destroy() {
         this.isDestroyed = true;
     }
-    draw(ctx) {
-        if (this.show && this.outerRange > 0) {
+    draw(ctx: CanvasRenderingContext2D) {
+        if (this.show && this.outerRange && this.outerRange > 0) {
             if (this.innerRange) {
                 ctx.beginPath();
                 ctx.arc(this.parent.position.x, this.parent.position.y, this.outerRange, 0, 2 * Math.PI, false);

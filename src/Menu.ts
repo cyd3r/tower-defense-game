@@ -1,17 +1,15 @@
-import { BufferLoader } from './engine/BufferLoader.js';
-import { GameEngine } from './engine/GameEngine.js';
-import { GameObject } from './engine/GameObject.js';
-import { Vector } from './engine/Vector.js';
+import { GameEngine, GameObject, Vector } from './engine';
+import { TileName } from './engine/tilesheet';
 import { Level } from './Level.js';
-import { levelList } from './levels/levelList.js';
-import { Wallet } from './Wallet.js';
+import { LevelData, levelList } from './levels/levelList';
 
 class HighlightableGameObject extends GameObject {
-    constructor(position, width, height, tileName, drawLayer) {
+    highlighted: boolean;
+    constructor(position: Vector, width: number, height: number, tileName: TileName, drawLayer: string) {
         super(position.x, position.y, width, height, tileName, drawLayer);
         this.highlighted = false;
     }
-    draw(ctx, tilesheet) {
+    draw(ctx: CanvasRenderingContext2D, tilesheet: CanvasImageSource) {
         if (this.highlighted) {
             ctx.filter = 'brightness(150%)';
         }
@@ -21,11 +19,10 @@ class HighlightableGameObject extends GameObject {
 }
 
 class TwoFloorBuilding {
-    /**
-     * @param {'castle' | 'tower'} buildingType
-     * @param {Vector} position
-     */
-    constructor(buildingType, position, tileSize) {
+    private topPart: HighlightableGameObject;
+    private bottomPart: HighlightableGameObject;
+
+    constructor(buildingType: 'castle' | 'tower', position: Vector, tileSize: number) {
         const topPos = position.sub({ x: 0, y: 1 }).mult(tileSize);
         const bottomPos = position.mult(tileSize);
         this.topPart = new HighlightableGameObject(topPos, tileSize, tileSize, `${buildingType}Top`, 'terrain');
@@ -55,11 +52,19 @@ class TwoFloorBuilding {
 }
 
 export class Menu {
+    tiles: GameObject[];
+    castles: TwoFloorBuilding[];
+    private windmill1: GameObject;
+    private windmill2: GameObject;
+    private windmill3: GameObject;
+    levelList: LevelData[];
+    _hoveredLevelIndex: number;
+    level?: Level;
     constructor() {
         const canvasSizeX = Math.ceil(GameEngine.width / this.tileSize);
         const canvasSizeY = Math.ceil(GameEngine.height / this.tileSize);
 
-        const tiles = [];
+        const tiles: { position: Vector, type: TileName }[] = [];
 
         for (let y = 0; y < canvasSizeY; y++){
             for (let x = 0; x < canvasSizeX; x++){
@@ -192,7 +197,7 @@ export class Menu {
             );
         });
 
-        this.castles = [
+        const castleData: { x: number, y: number, type: 'castle' | 'tower' }[] = [
             { x: 1.5, y: 3.5, type: 'castle' },
             { x: 3.5, y: 5.2, type: 'tower' },
             { x: 0.5, y: 8.2, type: 'tower' },
@@ -201,7 +206,8 @@ export class Menu {
             { x: 12.5, y: 1.5, type: 'castle' },
             { x: 8.5, y: 5.5, type: 'castle' },
             { x: 7.5, y: 1.2, type: 'tower' },
-        ].map(data => new TwoFloorBuilding(data.type, new Vector(data.x, data.y), this.tileSize));
+        ];
+        this.castles = castleData.map(data => new TwoFloorBuilding(data.type, new Vector(data.x, data.y), this.tileSize));
 
         this.windmill1 = new GameObject(5.5*this.tileSize, 3*this.tileSize, this.tileSize, this.tileSize, "windmillSail", 'terrain', 1);
         this.windmill2 = new GameObject(9.5*this.tileSize, 2*this.tileSize, this.tileSize, this.tileSize, "windmillSail", 'terrain', 2);
@@ -218,9 +224,9 @@ export class Menu {
         if (this._hoveredLevelIndex !== value) {
             this._hoveredLevelIndex = value;
             if (value === -1) {
-                document.querySelector('.logo').innerText = 'Tower Defense';
+                document.querySelector<HTMLElement>('.logo')!.innerText = 'Tower Defense';
             } else {
-                document.querySelector('.logo').innerText = `Level ${value + 1}: ${this.levelList[value].name}`;
+                document.querySelector<HTMLElement>('.logo')!.innerText = `Level ${value + 1}: ${this.levelList[value].name}`;
             }
         }
     }
@@ -246,7 +252,7 @@ export class Menu {
         return 64;
     }
 
-    loadLevel(levelIndex) {
+    loadLevel(levelIndex: number) {
         if (levelIndex !== -1) {
             const level = this.levelList[levelIndex];
             history.pushState(`?level=${levelIndex}`, level.name, `?level=${levelIndex}`)

@@ -1,18 +1,33 @@
-import { createEnemy, PRESETS } from './Enemy.js';
-import { BufferLoader } from './engine/BufferLoader.js';
-import { GameEngine } from './engine/GameEngine.js';
-import { ElectroTower } from './towers/ElectroTower.js';
-import { SlowdownArea } from './towers/SlowdownArea.js';
+import { createEnemy, Enemy, PRESETS } from './Enemy';
+import { BufferLoader, Drawable, GameEngine } from './engine';
+import { Terrain } from './Terrain';
+import { ElectroTower } from './towers/ElectroTower';
+import { SlowdownArea } from './towers/SlowdownArea';
 
-export class Wave {
-    /** @type {Wave} */
-    static singleton = undefined;
-    constructor(terrain, waveData) {
+interface WaveEntry {
+    what: string;
+    when: number;
+}
+
+export class Wave implements Drawable {
+    static singleton?: Wave = undefined;
+    private terrain: Terrain;
+    enemies: Enemy[];
+    startTime?: number;
+    private waiting: WaveEntry[];
+    private totalHitpoints: any;
+    private aliveHitpoints: number;
+    private waitingHitpoints: number;
+    reachedBaseCount: number;
+    private hearts: NodeListOf<HTMLImageElement>;
+    private waveProgressBar: any;
+    isDestroyed: boolean;
+    constructor(terrain: Terrain, waveData: WaveEntry[]) {
         this.terrain = terrain;
         this.enemies = [];
         this.startTime = undefined;
 
-        this.waiting = waveData.reduce((wave, enemy) => {
+        this.waiting = waveData.reduce<WaveEntry[]>((wave, enemy) => {
             if (wave.length > 0) {
                 // convert relative times to absolute times
                 enemy.when += wave[wave.length - 1].when;
@@ -68,7 +83,7 @@ export class Wave {
         const environments = [...SlowdownArea.all, ...ElectroTower.barriers];
         this.enemies.forEach(enemy => enemy.update(environments));
     }
-    draw(ctx, tilesheet) {
+    draw() {
         const waitingHitpoints = this.waiting.reduce((hitpoints, enemy) => hitpoints + PRESETS[enemy.what].hitpoints, 0);
 
         const stop = (this.totalHitpoints - waitingHitpoints) / this.totalHitpoints * 100;

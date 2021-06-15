@@ -1,11 +1,12 @@
-import { Vector } from '../engine/Vector.js';
+import { Vector } from '../engine';
+import { TileName } from '../engine/tilesheet';
 
 const DOWN = new Vector(0, 1);
 const UP = DOWN.mult(-1);
 const RIGHT = new Vector(1, 0);
 const LEFT = RIGHT.mult(-1);
 
-const PROP_NAMES = {
+const PROP_NAMES: {[key: string]: TileName} = {
     '*': 'treeStar',
     'o': 'treeSmall',
     'O': 'treeBig',
@@ -17,7 +18,12 @@ const PROP_NAMES = {
     'P': 'spawnMarker',
 };
 
-function getCell(terrain, position) {
+// https://dev.to/mapleleaf/indexing-objects-in-typescript-1cgi
+function hasKey<O>(obj: O, key: PropertyKey): key is keyof O {
+    return key in obj
+}
+
+function getCell(terrain: string[], position: Vector) {
     // out of bounds?
     if (position.x < 0 || position.y < 0 || position.y > terrain.length - 1 || position.x > terrain[position.y].length - 1) {
         return null;
@@ -25,12 +31,12 @@ function getCell(terrain, position) {
     return terrain[position.y][position.x];
 }
 
-function isGras(terrain, position) {
+function isGras(terrain: string[], position: Vector) {
     const cell = getCell(terrain, position);
     return cell && cell !== 'x' && cell !== '#';
 }
 
-function readTerrain(terrainStr) {
+function readTerrain(terrainStr: string) {
     let lines = terrainStr.split('\n');
     // first line can be empty (looks better in multiline string)
     if (lines[0] === '') {
@@ -40,7 +46,7 @@ function readTerrain(terrainStr) {
     return lines.map(line => line + ' '.repeat(levelWidth - line.length));
 }
 
-function getTilename(terrain, position) {
+function getTilename(terrain: string[], position: Vector) {
     if (isGras(terrain, position)) {
         return 'gras';
     }
@@ -77,10 +83,10 @@ function getTilename(terrain, position) {
     return 'road';
 }
 
-function createRoute(terrain, goalPos) {
+function createRoute(terrain: string[], goalPos: Vector) {
     const levelHeight = terrain.length;
     const levelWidth = terrain[0].length;
-    let walkDir;
+    let walkDir: Vector;
     if (goalPos.y === 0) {
         walkDir = new Vector(0, 1);
     } else if (goalPos.y === levelHeight - 1) {
@@ -123,7 +129,7 @@ function createRoute(terrain, goalPos) {
     return route;
 }
 
-function findPlaneSpawns(terrain) {
+function findPlaneSpawns(terrain: string[]) {
     const levelHeight = terrain.length;
     const levelWidth = terrain[0].length;
 
@@ -138,6 +144,12 @@ function findPlaneSpawns(terrain) {
         }
     }
     return spawns;
+}
+
+export interface TerrainTile {
+    position: Vector;
+    type: TileName;
+    prop?: TileName;
 }
 
 /** Creates `tiles` and `route` from `terrainStr`
@@ -156,14 +168,14 @@ Meaning of the characters:
 + `,`: medium rock
 + `:`: large rock
 */
-export function parseTerrain(terrainStr) {
+export function parseTerrain(terrainStr: string) {
     const terrain = readTerrain(terrainStr);
     const levelHeight = terrain.length;
     const levelWidth = terrain[0].length;
 
     let goalPos = undefined;
 
-    let tiles = [];
+    let tiles: TerrainTile[] = [];
     // only 4 row cells are allowed to be at the border
     let numRoadsAtBorder = 0;
 
@@ -184,10 +196,11 @@ export function parseTerrain(terrainStr) {
                 numRoadsAtBorder += 1;
             }
 
+            const propSymbol = terrain[row][col];
             tiles.push({
                 position,
                 type: getTilename(terrain, position),
-                prop: PROP_NAMES[terrain[row][col]],
+                prop: hasKey(PROP_NAMES, propSymbol) ? PROP_NAMES[propSymbol] : undefined,
             });
         }
     }
@@ -206,7 +219,7 @@ export function parseTerrain(terrainStr) {
     return { tiles, route, planeSpawns };
 }
 
-export function createHintElements(hintStr) {
+export function createHintElements(hintStr: string) {
     return hintStr.split('\n')
     .filter(line => line !== '')
     .map(line => {

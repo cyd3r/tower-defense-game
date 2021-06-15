@@ -1,12 +1,28 @@
 import { Enemy } from './Enemy.js';
 import { BufferLoader } from './engine/BufferLoader.js';
 import { GameEngine } from './engine/GameEngine.js';
-import { ChildGameObject } from './engine/GameObject.js';
+import { ChildGameObject, GameObject } from './engine/GameObject.js';
+import { TileName } from './engine/tilesheet.js';
 import { interpolateColor } from './engine/util.js';
 import { Vector } from './engine/Vector.js';
 import { ParticleEmitter } from './Particles.js';
 
-export const PRESETS = {
+export interface Preset {
+    tileName: TileName;
+    velocity: number;
+    damage: number;
+    width: number;
+    height: number;
+    isAAC?: boolean;
+    isCannonBall?: boolean;
+    isHomingMissile?: boolean;
+    damageRange?: number;
+    outerDamageRatio?: number;
+    isMissile?: boolean;
+}
+type PresetName = 'rocketSmall' | 'homingMissile' | 'aacBullet' | 'cannonBall';
+
+export const PRESETS: {[key in PresetName]: Preset} = {
     rocketSmall: {
         tileName: 'rocketSmall',
         velocity: 100,
@@ -47,7 +63,7 @@ export const PRESETS = {
     },
 };
 
-export function createProjectile(preset, parent, position, direction) {
+export function createProjectile(preset: Preset, parent: GameObject, position: Vector, direction: Vector) {
     if (preset.isHomingMissile) {
         return new HomingMissile(preset, parent, position, direction);
     }
@@ -58,8 +74,16 @@ export function createProjectile(preset, parent, position, direction) {
 }
 
 export class Projectile extends ChildGameObject {
-    static all = [];
-    static updateAll(enemies) {
+    static all: Projectile[] = [];
+    protected velocity: number;
+    protected damage: number;
+    private damageRange?: number;
+    private outerDamageRatio: number;
+    private isMissile?: boolean;
+    private isAAC?: boolean;
+    private tail?: MissileTail;
+
+    static updateAll(enemies: Enemy[]) {
         Projectile.all = Projectile.all.filter(projectile => {
             if (projectile.isDestroyed) {
                 return false;
@@ -74,7 +98,7 @@ export class Projectile extends ChildGameObject {
             return true;
         });
     }
-    constructor(preset, parent, position, direction) {
+    constructor(preset: Preset, parent: GameObject, position: Vector, direction: Vector) {
         super(parent, position.x, position.y, preset.width, preset.height, preset.tileName, 'projectile');
         this.velocity = preset.velocity;
         this.damage = preset.damage;
@@ -98,8 +122,7 @@ export class Projectile extends ChildGameObject {
         super.destroy();
         this.tail?.destroy();
     }
-    /** @param {Enemy[]} enemies */
-    update(enemies) {
+    update(enemies: Enemy[]) {
         if (this.isDestroyed || this.parent) {
             return;
         }
@@ -113,9 +136,9 @@ export class Projectile extends ChildGameObject {
         }
     }
 
-    doCollision(target, enemies) {
+    doCollision(target: Enemy, enemies: Enemy[]) {
         const impactPosition = this.position.add(target.position).mult(.5);
-        if (this.damageRange > 0) {
+        if (this.damageRange && this.damageRange > 0) {
             for (let enemy of enemies) {
                 const distance = ((enemy === target) ? 0 : impactPosition.distanceTo(enemy.position));
                 if (distance <= this.damageRange){
@@ -146,7 +169,7 @@ export class Projectile extends ChildGameObject {
         }
         if (this.isMissile) {
             ParticleEmitter.create(impactPosition, target.position.sub(this.position).norm(), {
-                color: t => interpolateColor([160, 160, 160, 130], [221, 136, 44, 30], t),
+                color: (t: number) => interpolateColor([160, 160, 160, 130], [221, 136, 44, 30], t),
                 radius: () => 10,
                 destination: ()  => Vector.randomFromEllipse(80, 50),
                 rotationVelocity: () => Math.random() * 3,
@@ -162,8 +185,10 @@ export class Projectile extends ChildGameObject {
 }
 
 export class HomingMissile extends Projectile {
-    /** @param {Enemy} target The enemy to follow */
-    constructor(preset, parent, position, direction){
+    target?: Enemy;
+    private showShadow: boolean;
+    private altitude: number;
+    constructor(preset: Preset, parent: GameObject, position: Vector, direction: Vector){
         super(preset, parent, position, direction)
         this.target = undefined;
         this.showShadow = false;
@@ -174,7 +199,7 @@ export class HomingMissile extends Projectile {
         this.showShadow = true;
     }
 
-    update(enemies) {
+    update(enemies: Enemy[]) {
         if (this.isDestroyed || this.parent) {
             return;
         }
@@ -187,11 +212,11 @@ export class HomingMissile extends Projectile {
             }
         }
         this.move(this.velocity * GameEngine.deltaTime, 0);
-        if (this.collidesWith(this.target)) {
+        if (this.target && this.collidesWith(this.target)) {
             this.doCollision(this.target, enemies);
         }
     }
-    draw(ctx, tilesheet) {
+    draw(ctx: CanvasRenderingContext2D, tilesheet: CanvasImageSource) {
         if (this.showShadow) {
             ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
             ctx.shadowOffsetX = 20 * this.altitude;
@@ -205,11 +230,12 @@ export class HomingMissile extends Projectile {
 }
 
 class CannonBall extends Projectile {
-    constructor(preset, parent, position, direction) {
+    private hitList: Enemy[];
+    constructor(preset: Preset, parent: GameObject, position: Vector, direction: Vector) {
         super(preset, parent, position, direction);
         this.hitList = [];
     }
-    update(enemies) {
+    update(enemies: Enemy[]) {
         if (this.isDestroyed || this.parent) {
             return;
         }
@@ -232,19 +258,22 @@ class CannonBall extends Projectile {
 }
 
 class MissileTail extends ChildGameObject {
-    constructor(parent) {
+    constructor(parent: GameObject) {
         super(parent, 0, 0, 18, 31, 'flashMedium', 'projectile');
         this.localForward = new Vector(0, -1);
         this.localPosition = new Vector(0, -.5 * parent.height - .5 * this.height);
     }
-    draw(ctx, tilesheet) {
+    draw(ctx: CanvasRenderingContext2D, tilesheet: CanvasImageSource) {
+        if (!this.parent) {
+            return;
+        }
         const now = GameEngine.timeSinceStartup;
         const t = Math.sin(now * 12.5);
         const origWidth = this.width;
         const origHeight = this.height;
         this.width = origWidth + t * 0.1 * origWidth;
         this.height = origHeight + t * 0.07 * origHeight;
-        this.localPosition.y = -.5 * this.parent.height - .5 * this.height;
+        this.localPosition.y = -.5 * (this.parent as GameObject).height - .5 * this.height;
         ctx.filter = `brightness(${100 + t * 5}%)`;
         super.draw(ctx, tilesheet);
         this.width = origWidth;

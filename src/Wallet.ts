@@ -1,18 +1,25 @@
-import { CoinTower } from './towers/CoinTower.js';
-import { ElectroTower } from './towers/ElectroTower.js';
-import { SlowdownArea } from './towers/SlowdownArea.js';
-import { DoubleRocketTurret, AAC , HomingMissileTurret, Cannon} from './towers/Turret.js';
+import { TowerStatic, TowerType as TowerTypeType } from './towers';
+import { CoinTower } from './towers/CoinTower';
+import { ElectroTower } from './towers/ElectroTower';
+import { SlowdownArea } from './towers/SlowdownArea';
+import { DoubleRocketTurret, AAC , HomingMissileTurret, Cannon} from './towers/Turret';
 
 export class Wallet {
-    static singleton = undefined;
-    constructor(towersElement, coinsElement) {
+    static singleton?: Wallet = undefined;
+    private coinsElement: HTMLElement;
+    private _towerToBuild?: TowerStatic;
+    private _demolishTower: boolean;
+    private towerBtns: HTMLButtonElement[];
+    private demolishBtn: HTMLElement;
+    private _coins: number;
+    constructor(towersElement: HTMLElement, coinsElement: HTMLElement) {
         Wallet.singleton = this;
 
         this.coinsElement = coinsElement;
         this._towerToBuild = undefined;
         this._demolishTower = false;
 
-        const towers = [CoinTower, SlowdownArea, AAC, DoubleRocketTurret, Cannon, HomingMissileTurret, ElectroTower];
+        const towers: TowerStatic[] = [CoinTower, SlowdownArea, AAC, DoubleRocketTurret, Cannon, HomingMissileTurret, ElectroTower];
         const towerKeys = ['1', '2', '3', '4', '5', '6', '7'];
         this.towerBtns = towers.map((TowerType, i) => {
             const div = document.createElement('div');
@@ -22,8 +29,8 @@ export class Wallet {
             div.appendChild(btn);
             btn.classList.add('tower-button');
             btn.dataset.tower = TowerType.iconName;
-            btn.dataset.cost = TowerType.cost;
-            btn.title = TowerType.name;
+            btn.dataset.cost = TowerType.cost + '';
+            btn.title = TowerType.displayName;
 
             const img = document.createElement('img');
             img.src = `static/images/tower-defense-top-down/${TowerType.iconName}.png`;
@@ -45,7 +52,7 @@ export class Wallet {
 
             const titleElt = document.createElement('h2');
             titleElt.classList.add('white-shadow');
-            titleElt.innerText = TowerType.name;
+            titleElt.innerText = TowerType.displayName;
             divDetails.appendChild(titleElt);
 
             const costElt = document.createElement('p');
@@ -93,13 +100,13 @@ export class Wallet {
             }
         });
 
-        this.demolishBtn = document.querySelector('.demolish');
+        this.demolishBtn = document.querySelector('.demolish')!;
         this.demolishBtn.addEventListener('click', () => {
             this.towerToBuild = undefined;
             this.demolishTower = !this.demolishTower;
         })
 
-        this.coins = 20;
+        this._coins = 20;
     }
     set towerToBuild(value) {
         this._towerToBuild = value;
@@ -119,17 +126,20 @@ export class Wallet {
     }
     set coins(value) {
         this._coins = value;
-        this.coinsElement.innerText = value;
+        this.coinsElement.innerText = value + '';
         this.towerBtns.forEach(btn => {
-            btn.classList.toggle('not-affordable', btn.dataset.cost > value);
+            btn.classList.toggle('not-affordable', btn.dataset.cost !== undefined && parseInt(btn.dataset.cost) > value);
         });
     }
     get coins() {
         return this._coins;
     }
     buySelected() {
-        console.assert(this.towerToBuild, 'No tower selected that can be bought');
-        this.coins -= this.towerToBuild.cost;
-        this.towerToBuild = undefined;
+        if (this.towerToBuild) {
+            this.coins -= this.towerToBuild.cost;
+            this.towerToBuild = undefined;
+        } else {
+            console.warn('No tower selected that can be bought');
+        }
     }
 }

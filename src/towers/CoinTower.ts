@@ -1,15 +1,21 @@
-import { BufferLoader } from '../engine/BufferLoader.js';
-import { GameEngine } from '../engine/GameEngine.js';
-import { ChildGameObject, GameObject } from '../engine/GameObject.js';
+import { implementsTowerStatic, Tower } from '.';
+import { BufferLoader, GameEngine, ChildGameObject, GameObject, Vector } from '../engine';
 import { Wallet } from '../Wallet.js';
 
+@implementsTowerStatic()
+export class CoinTower extends GameObject implements Tower {
+    private coinCollectedTime?: number;
+    private productionTime: number;
+    private coin?: ChildGameObject;
 
-export class CoinTower extends GameObject {
     static cost = 10;
     static iconName = 'coinTower';
-    static name = 'Factory';
+    static displayName = 'Factory';
     static description = 'Produces coins';
-    constructor(position) {
+
+    static build(position: Vector) { return new CoinTower(position); }
+
+    constructor(position: Vector) {
         super(position.x, position.y, 80, 80, 'socketSmall', 'tower');
         this.coin = undefined;
         this.coinCollectedTime = undefined;
@@ -43,7 +49,7 @@ export class CoinTower extends GameObject {
             const rndOffset = (Math.random() - .5) * 4;
             this.coinCollectedTime = GameEngine.timeSinceStartup + rndOffset;
             this.productionTime = 20;
-            Wallet.singleton.coins += 5;
+            Wallet.singleton!.coins += 5;
             BufferLoader.play('coin');
         }
     }

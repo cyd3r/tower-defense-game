@@ -1,8 +1,14 @@
-import { ChildGameObject, GameObject } from './engine/GameObject.js';
-import { Vector } from './engine/Vector.js';
+import { ChildGameObject, GameObject, Vector } from './engine';
+import { LevelData } from './levels/levelList';
 
 export class Terrain {
-    constructor(levelData) {
+    _levelData: LevelData;
+    tiles: GameObject[];
+    props: GameObject[];
+    route: Vector[];
+    planeSpawns: Vector[];
+    baseVisual: BaseVisual;
+    constructor(levelData: LevelData) {
         const propSize = .75 * this.tileSize;
 
         this._levelData = levelData;
@@ -28,7 +34,7 @@ export class Terrain {
             return new GameObject(
                 pos.x, pos.y,
                 propSize, propSize,
-                tile.prop,
+                tile.prop!,
                 'terrain',
                 // random rotation
                 tile.prop === 'spawnMarker' ? 0 : Math.random() * Math.PI * 2,
@@ -52,8 +58,7 @@ export class Terrain {
         return this._levelData.name;
     }
 
-    /** @param {Vector} position */
-    getTileAt(position) {
+    getTileAt(position: Vector) {
         const tilePos = position.divide(this.tileSize).floor();
         const tile = this._levelData.tiles.find(tile => tilePos.isEqual(tile.position));
 
@@ -72,7 +77,7 @@ export class Terrain {
     /** Returns the route with an additional offset applied
      * @param offset 0 means no offset. Leave empty for random offset
      */
-    getOffsetRoute(offset) {
+    getOffsetRoute(offset?: number) {
         if (offset === undefined) {
             offset = Math.random() - .5;
         }
@@ -123,7 +128,10 @@ export class Terrain {
 }
 
 class BaseVisual {
-    constructor(position, forward, tileSize) {
+    position: Vector;
+    forward: Vector;
+    baseParts: ChildGameObject[];
+    constructor(position: Vector, forward: Vector, tileSize: number) {
         this.position = position;
         this.forward = forward;
 

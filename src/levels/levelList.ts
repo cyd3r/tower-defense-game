@@ -1,7 +1,18 @@
-import { Vector } from '../engine/Vector.js';
-import { parseTerrain } from './parser.js';
+import { Vector } from '../engine';
+import { TileName } from '../engine/tilesheet';
+import { parseTerrain, TerrainTile } from './parser';
 
-export const levelList = [
+export interface LevelData {
+  name: string;
+  menuPosition: Vector;
+  wave: { when: number, what: string }[];
+  route: Vector[];
+  planeSpawns: Vector[];
+  hints: string;
+  tiles: TerrainTile[];
+}
+
+export const levelList: LevelData[] = [
   {
   name: "They are coming!",
   menuPosition: new Vector(1, 2),

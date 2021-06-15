@@ -1,29 +1,35 @@
-import { createHintElements } from './levels/parser.js';
+import { Vector } from './engine';
+import { LevelData } from './levels/levelList';
+import { createHintElements } from './levels/parser';
 import { Terrain } from './Terrain.js';
 import { TowerGrid } from './towers/TowerGrid.js';
 import { Wallet } from './Wallet.js';
 import { Wave } from './Wave.js';
 
 export class Level {
-    constructor(level) {
+    terrain: Terrain;
+    wave: Wave;
+    towerGrid: TowerGrid;
+    wallet: Wallet;
+    constructor(level: LevelData) {
         this.terrain = new Terrain(level);
         this.wave = new Wave(this.terrain, level.wave);
         this.towerGrid = new TowerGrid(this.terrain.tileSize);
-        this.wallet = new Wallet(document.querySelector('.towers'), document.querySelector('.my-coins'));
+        this.wallet = new Wallet(document.querySelector('.towers')!, document.querySelector('.my-coins')!);
 
         document.body.classList.add('ingame');
 
         if (level.hints) {
-            const hintsBox = document.querySelector('.hints .content');
+            const hintsBox = document.querySelector('.hints .content')!;
             createHintElements(level.hints).forEach(elt => hintsBox.appendChild(elt));
         }
-        document.querySelector('.hints-container').classList.toggle('hidden', !level.hints);
+        document.querySelector('.hints-container')!.classList.toggle('hidden', !level.hints);
     }
     get name() {
         return this.terrain.name;
     }
 
-    click(position) {
+    click(position: Vector) {
         const currentTile = this.terrain.getTileAt(position);
         const existingTower = this.towerGrid.getTowerAt(position);
         if(this.wallet.towerToBuild) {

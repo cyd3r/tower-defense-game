@@ -1,13 +1,18 @@
 import { Enemy } from './Enemy.js';
-import { GameEngine } from './engine/GameEngine.js';
+import { Drawable, GameEngine } from './engine';
 
 const SHOW_TIME = 3;
 const OUTER_DIST = 200;
 const INNER_DIST = 50;
 
-export class Healthbar {
-    /** @param {Enemy} parent */
-    constructor(parent, yOffset) {
+export class Healthbar implements Drawable {
+    private parent: Enemy;
+    private yOffset: number;
+    isDestroyed: boolean;
+    private lastChangeTime: number;
+    private lastHitpoints: number;
+
+    constructor(parent: Enemy, yOffset: number) {
         this.parent = parent;
         this.yOffset = yOffset;
         this.isDestroyed = false;
@@ -19,8 +24,7 @@ export class Healthbar {
     destroy() {
         this.isDestroyed = true;
     }
-    /** @param {CanvasRenderingContext2D} ctx */
-    draw(ctx) {
+    draw(ctx: CanvasRenderingContext2D) {
         // only show healthbar if the value changed recently or the cursor is close
         const now = GameEngine.timeSinceStartup;
         if (this.lastHitpoints !== this.parent.hitpoints) {

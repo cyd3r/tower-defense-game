@@ -1,20 +1,24 @@
-import { GameEngine } from '../engine/GameEngine.js';
-import { ChildGameObject, GameObject } from '../engine/GameObject.js';
-import { RangeRenderer } from './RangeRenderer.js';
+import { implementsTowerStatic, Tower } from '.';
+import { Enemy, Environment } from '../Enemy';
+import { GameEngine, ChildGameObject, GameObject, Vector } from '../engine';
+import { RangeRenderer } from './RangeRenderer';
 
 const MAX_DISTANCE = 64 * 4;
 const DAMAGE = 10;
 
-export class ElectroTower extends GameObject {
+@implementsTowerStatic()
+export class ElectroTower extends GameObject implements Tower {
     static cost = 50;
     static iconName = 'electroTower';
-    static name = 'Tesla Tower';
+    static displayName = 'Tesla Tower';
     static description = `Generates electric barriers between other Tesla Towers.
 Planes are not affected.`;
     static range = MAX_DISTANCE;
 
-    static all = [];
-    static barriers = [];
+    static all: ElectroTower[] = [];
+    static barriers: ElectricBarrier[] = [];
+    rangeRenderer: RangeRenderer;
+    pole: ChildGameObject;
 
     static rebuildBarriers() {
         ElectroTower.barriers.forEach(b => b.destroy());
@@ -47,7 +51,9 @@ Planes are not affected.`;
         }
     }
 
-    constructor(position) {
+    static build(position: Vector) { return new ElectroTower(position); }
+
+    constructor(position: Vector) {
         super(position.x, position.y, 64, 64, 'socket2', 'tower');
 
         ElectroTower.all.push(this);
@@ -71,8 +77,17 @@ Planes are not affected.`;
     }
 }
 
-class ElectricBarrier {
-    constructor(from, to, breadth, damage) {
+class ElectricBarrier implements Environment {
+    from: Vector;
+    to: Vector;
+    breadth: number;
+    segments: Vector[];
+    normal: Vector;
+    collBox: Vector[];
+    damage: number;
+    isDestroyed: boolean;
+
+    constructor(from: Vector, to: Vector, breadth: number, damage: number) {
         this.from = from;
         this.to = to;
         this.breadth = breadth;
@@ -100,7 +115,7 @@ class ElectricBarrier {
     getCollisionBox() {
         return this.collBox;
     }
-    apply(enemy) {
+    apply(enemy: Enemy) {
         if (!enemy.ignoreElectro && enemy.collidesWith(this)) {
             return { isElectrocuted: true };
         }
@@ -109,8 +124,7 @@ class ElectricBarrier {
     destroy() {
         this.isDestroyed = true;
     }
-    /** @param {CanvasRenderingContext2D} ctx */
-    draw(ctx) {
+    draw(ctx: CanvasRenderingContext2D) {
         ctx.beginPath();
         ctx.moveTo(this.from.x, this.from.y);
 
